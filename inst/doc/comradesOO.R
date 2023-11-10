@@ -13,9 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## ----echo = T, results = 'hide',message=FALSE---------------------------------
 # Load the comrades-OO Library 
+#install.packages("comradesOO")
 library(comradesOO)
 
-## ----echo = F, results = 'hide',message=FALSE---------------------------------
+## ----echo = T, results = 'hide',message=FALSE---------------------------------
 # Here are the other libraries on which comradesOO relies
 library(seqinr)
 library(GenomicRanges)
@@ -33,10 +34,6 @@ library(TopDom)
 library(tidyverse)
 library(RRNA)
 library(ggrepel)
-
-## ----echo = T, results = 'hide',message=FALSE---------------------------------
-# Load the comrades-OO Library 
-library(comradesOO)
 
 ## -----------------------------------------------------------------------------
 # Set up the sample table
@@ -80,25 +77,6 @@ shape = read.table(pathShape,
                       header = F)
 
 ## -----------------------------------------------------------------------------
-# runComradesOO(rna,
-#                     rnaSize =0 ,
-#                     sampleTable,
-#                     cores = 3,
-#                     stepCount = 2,
-#                     clusterCutoff = 20,
-#                     clusteredCds,
-#                     trimFactor = 2.5, 
-#                     clusterCutoff = 1,
-#                     rnaRefs,
-#                     start,
-#                     end,
-#                     evCutoff = 1,
-#                     ensembl = 50,
-#                     constraintNumber = 20,
-#                     shape = 0)
-
-
-## -----------------------------------------------------------------------------
 # load the object
 cds = comradesDataSet(rnas = rna,
                       sampleTable = sampleTable2)
@@ -124,22 +102,24 @@ group(cds)
 # Get the sample names of the instance
 sampleNames(cds)
 
-## ----eval=FALSE,echo=FALSE----------------------------------------------------
+## ----eval=FALSE,echo=TRUE-----------------------------------------------------
 #  # Return the hybFiles slot
 #  hybFiles(cds)
 
-## ----eval=FALSE, echo=FALSE---------------------------------------------------
-#  # Return the matrixList slotmatrixList(cds)
+## ----eval=FALSE, echo=TRUE----------------------------------------------------
+#  # Return the matrixList slot
+#  matrixList(cds)
 
 ## -----------------------------------------------------------------------------
-data = getData(cds,       # The object      
-        "hybFiles",       # The Type of data to return     
-        "original")[[1]]  # The stage of the analysis for the return data
+data = getData(x    = cds,              # The object      
+               data =  "hybFiles",       # The Type of data to return     
+               type = "original")[[1]] # The stage of the analysis for the return data
+
 head(data)
 
 ## -----------------------------------------------------------------------------
-
 # Returns the RNAs with highest number of assigned reads 
+# regardless of wether it is an Inter or Intra - RNA interaction. 
 topTranscripts(cds, # The comradesDataSet instance
                2)  # The number of entried to return
 
@@ -156,11 +136,22 @@ topInteractions(cds, # The comradesDataSet instance
 
 
 ## -----------------------------------------------------------------------------
+features = featureInfo(cds) # The comradesDataSet instance
+
+
+# Counts for features at the transcript level
+features$transcript
+
+# Counts for features at the family level (last field with  "_" delimited IDs)
+features$family
+
+
+## -----------------------------------------------------------------------------
 # Cluster the reads
 clusteredCds = clusterComrades(cds = cds,         # The comradesDataSet instance 
                                cores = 1,         # The number of cores
                                stepCount = 2,     # The number of steps in the random walk
-                               clusterCutoff = 3) # The minimum number of reads for a cluster to be considered
+                               clusterCutoff = 1) # The minimum number of reads for a cluster to be considered
 
 ## -----------------------------------------------------------------------------
 # Check status of instance 
@@ -168,7 +159,7 @@ clusteredCds
 
 ## -----------------------------------------------------------------------------
 # Returns the number of clusters in each sample
-#clusterNumbers(clusteredCds)
+clusterNumbers(clusteredCds)
 
 ## -----------------------------------------------------------------------------
 # Returns the number reads in clusters
@@ -179,9 +170,8 @@ getData(clusteredCds,        # The object
         "clusterTableList",  # The Type of data to return     
         "original")[[1]]     # The stage of the analysis for the return data
 
-## ----eval=FALSE, echo=FALSE---------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  getData(clusteredCds,         # The object
-#          rna,                  # The rna of interest
 #          "clusterGrangesList", # The Type of data to return
 #          "original")[[1]]      # The stage of the analysis for the return data
 
@@ -189,23 +179,30 @@ getData(clusteredCds,        # The object
 # Trim the Clusters
 trimmedClusters = trimClusters(clusteredCds = clusteredCds, # The comradesDataSet instance 
                                trimFactor = 1,              # The cutoff for cluster trimming (see above)
-                               clusterCutoff = 30)          # The minimum number of reads for a cluster to be considered
+                               clusterCutoff = 0)          # The minimum number of reads for a cluster to be considered
 
 ## -----------------------------------------------------------------------------
 # Check status of instance 
 trimmedClusters
 
+## -----------------------------------------------------------------------------
+# Returns the number of clusters in each sample
+clusterNumbers(trimmedClusters)
+
+## -----------------------------------------------------------------------------
+# Returns the number reads in clusters
+readNumbers( trimmedClusters)
+
 ## ----error=FALSE,eval = FALSE, results=FALSE,message=FALSE--------------------
 #  # Fold the RNA in part of whole
 #  foldedCds = foldComrades(trimmedClusters,
-#                           rna = rna,
 #                           rnaRefs = rnaRefs,
-#                           start = 1700,
+#                           start = 1600,
 #                           end = 1869,
 #                           shape = 0,
-#                           ensembl = 40,
-#                           constraintNumber  = 5,
-#                           evCutoff = 50)
+#                           ensembl = 20,
+#                           constraintNumber  = 30,
+#                           evCutoff = 5)
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  # Check status of instance
@@ -224,9 +221,11 @@ plotMatrices(cds = cds,         # The comradesDataSet instance
 
 
 ## -----------------------------------------------------------------------------
+trimmedClusters
+
 # Plot heatmaps for all samples combined and all controls combined
-plotMatricesAverage(cds = cds, # The comradesDataSet instance 
-             type = "original", # The "analysis stage"
+plotMatricesAverage(cds = trimmedClusters, # The comradesDataSet instance 
+             type = "trimmedClusters", # The "analysis stage"
              directory = 0,     # The directory for output (0 for standard out)
              a = 1,             # Start coord for x-axis
              b = rnaSize(cds),  # End coord for x-axis
@@ -284,29 +283,21 @@ plotMatricesAverage(cds = cds, # The comradesDataSet instance
 ## ----eval = FALSE-------------------------------------------------------------
 #  plotEnsemblePCA(foldedCds,
 #                  labels = T, # plot labels for structures
-#                  split = F)  # split samples over different facets (T/f)
+#                  split = T)  # split samples over different facets (T/f)
 #  
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  plotComparisonArc(foldedCds = foldedCds,
-#                    s1 = "s1",            # The sample of the 1st structure
+#                    s1 = "c1",            # The sample of the 1st structure
 #                    s2 = "s1",            # The sample of the 2nd structure
-#                    n1 = 1,               # The number of the 1st structure
-#                    n2 = 2)               # The number of the 2nd structure
+#                    n1 = 13,               # The number of the 1st structure
+#                    n2 = 16)               # The number of the 2nd structure
 
 ## ----eval = F-----------------------------------------------------------------
 #  plotStructure(foldedCds = foldedCds,
 #                rnaRefs = rnaRefs,
 #                s = "s1",          # The sample of the structure
 #                n = 1)             # The number of the structure
-
-## ----message=FALSE, echo=F,eval = FALSE, results='hide'-----------------------
-#  
-#  plotStructure(foldedCds = foldedCds,
-#                rnaRefs = rnaRefs,
-#                s =  "s1",        # The sample of the structure
-#                n = 1)            # The number of the structure
-#  
 
 ## -----------------------------------------------------------------------------
 
@@ -399,5 +390,114 @@ readNumbers(knowClusteredCds)
 #      xlim(0,1)+
 #      ylim(0,1)+
 #      theme_classic()
+#  
+
+## ----eval = FALSE-------------------------------------------------------------
+#  # make an example dataset
+#  cds = makeExampleComradesDataSet()
+#  cds
+
+## ----eval = FALSE-------------------------------------------------------------
+#  # Have a look at the reads for each sample
+#  plotMatricesAverage(cds = cds,
+#                      type = "original",
+#                      directory = 0,
+#                      a = 1,
+#                      b = rnaSize(cds),
+#                      c = 1,
+#                      d = rnaSize(cds),
+#                      h = 5)
+#  
+
+## ----eval = FALSE-------------------------------------------------------------
+#  topInteracters(cds,2)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  featureInfo(cds)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  clusteredCds = clusterComrades(cds = cds,
+#                                 cores = 1,
+#                                 stepCount = 2,
+#                                 clusterCutoff = 0)
+#  
+#  
+#  
+#  
+#  
+#  
+#  trimmedClusters = trimClusters(clusteredCds = clusteredCds,
+#                                 trimFactor = 1,
+#                                 clusterCutoff = 0)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  plotMatricesAverage(cds = clusteredCds,
+#                      type = "originalClusters",
+#                      directory = 0,
+#                      a = 1,
+#                      b = rnaSize(cds),
+#                      c = 1,
+#                      d = rnaSize(cds),
+#                      h = 5)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  plotMatricesAverage(cds = trimmedClusters,
+#                      type = "trimmedClusters",
+#                      directory = 0,
+#                      a = 1,
+#                      b = rnaSize(cds),
+#                      c = 1,
+#                      d = rnaSize(cds),
+#                      h = 5)
+#  
+
+## ----eval = FALSE-------------------------------------------------------------
+#  
+#  fasta = paste(c(rep('A',25),
+#                  rep('T',25),
+#                  rep('A',10),
+#                  rep('T',23)),collapse = "")
+#  
+#  header = '>transcript1'
+#  
+#  
+#  fastaFile = tempfile()
+#  writeLines(paste(header,fasta,sep = "\n"),con = fastaFile)
+#  
+#  
+#  rnaRefs = list()
+#  rnaRefs[[rnas(cds)]] = read.fasta(fastaFile)
+#  rnaRefs
+#  
+#  
+#  
+#  foldedCds = foldComrades(trimmedClusters,
+#                           rnaRefs = rnaRefs,
+#                           start = 1,
+#                           end = 83,
+#                           shape = 0,
+#                           ensembl = 5,
+#                           constraintNumber  = 1,
+#                           evCutoff = 1)
+#  
+
+## ----eval = FALSE-------------------------------------------------------------
+#  # make an example table of "know" interactions
+#  file = data.frame(V1 = c(6),
+#                    V2 = c(80))
+#  
+#  compareKnownStructures(foldedCds,file)
+#  
+
+## ----eval = FALSE-------------------------------------------------------------
+#  
+#  plotEnsemblePCA(foldedCds, labels = T,split = T)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  plotComparisonArc(foldedCds = foldedCds,"s1","c1",2,3)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  plotStructure(foldedCds = foldedCds,"c1",1)
+#  
 #  
 

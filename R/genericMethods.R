@@ -13,35 +13,37 @@ NULL
  
 setMethod("show", "comradesDataSet", function(object) {
     cat("comradesDataSet Object \n")
-    cat("RNAs Analysed       - ",rnas(object), "\n")
-    cat("Samples Analysed    - ",sampleNames(object), "\n")
+    cat("RNAs Analysed                -              - ",rnas(object), "\n")
+    cat("Samples Analysed             -              - ",sampleNames(object), "\n")
     types = c()
     for(i in names(hybFiles(object)[[rnas(object)[1]]])){
         types = c(types  , i)
     }
-    cat("Raw data            - ", types, "\n") 
+    cat("hybFiles           - Raw data               - ", types, "\n") 
     
     types = c()
     for(i in names(matrixList(object)[[rnas(object)[1]]])){
         types = c(types  , i)
     }
-    cat("Matrix Types        - ", types, "\n")
-    
+    cat("matrixList         - Contact Matricies      - ", types, "\n")
+     
     types = c()
     for(i in names(clusterTableList(object)[[rnas(object)[1]]])){
         types = c(types  , i)
     }
-    cat("Cluster Types       - ", types, "\n")
+    cat("clusterTableList   - Cluster positions      - ", types, "\n")
     
     types = c()
     for(i in names(clusterGrangesList(object)[[rnas(object)[1]]])){
         types = c(types  , i)
     }
-    cat("Granges Types       - ", types, "\n")
+    cat("clusterGrangesList - Granges of clusters    - ", types, "\n")
     
-    cat("Interactions        - ", dim(object@interactionTable), "\n")
+    cat("interactionTable   - Predictied interaction - ", dim(object@interactionTable)[1], "\n")
     
-    cat("Vienna Structures   - ", length(object@viennaStructures), "\n")
+    cat("viennaStructures   - Predicted Structures   - ",
+         length(object@viennaStructures), sep = "", 
+        "\n")
     
 
     
@@ -118,7 +120,8 @@ setMethod("sampleNames", "comradesDataSet", function( x)
 #' sampleTable(cds)
 #' @export
 setGeneric("sampleTable", function(x) standardGeneric("sampleTable"))
-setMethod("sampleTable", "comradesDataSet", function(x)   x@sampleTable)
+setMethod("sampleTable", "comradesDataSet", function(x)   
+  x@sampleTable)
 
 #' group
 #' 
@@ -133,13 +136,9 @@ setMethod("sampleTable", "comradesDataSet", function(x)   x@sampleTable)
 #' @export
 setGeneric("group", function(x) standardGeneric("group"))
 setMethod("group", "comradesDataSet", function(x)
-    
    list("c" =  which(sampleTable(x)$group == "c"),
         "s" = which(sampleTable(x)$group== "s") )
-
-
 )
-
 
 
 #' rnas
@@ -157,7 +156,8 @@ setMethod("group", "comradesDataSet", function(x)
 #' rnas(cds)
 #' @export
 setGeneric("rnas", function(x) standardGeneric("rnas"))
-setMethod("rnas", "comradesDataSet", function(x)  x@rnas)
+setMethod("rnas", "comradesDataSet", function(x) 
+  x@rnas)
 
 
 
@@ -176,7 +176,8 @@ setMethod("rnas", "comradesDataSet", function(x)  x@rnas)
 #' rnaSize(cds)
 #' @export
 setGeneric("rnaSize", function(x) standardGeneric("rnaSize"))
-setMethod("rnaSize", "comradesDataSet", function(x)  x@rnaSize)
+setMethod("rnaSize", "comradesDataSet", function(x) 
+  x@rnaSize)
 
 #' hybFiles
 #' 

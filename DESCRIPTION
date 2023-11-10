@@ -2,7 +2,7 @@ Package: comradesOO
 Type: Package
 Title: Analysis of COMRADES (Cross-Linking Matched RNA and Deep
         Sequencing) Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Jonathan", "Price", email="jlp76@cam.ac.uk", role=c("aut","cre")))
 Maintainer: Jonathan Price <jlp76@cam.ac.uk>
 Description: Analysis of RNA crosslinking data for RNA structure prediction. The package is suitable for the analysis of RNA structure cross-linking data and chemical probing data.
@@ -25,7 +25,7 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2023-11-02 11:55:42 UTC; jp
+Packaged: 2023-11-10 12:17:30 UTC; jp
 Author: Jonathan Price [aut, cre]
 Repository: CRAN
-Date/Publication: 2023-11-02 20:20:09 UTC
+Date/Publication: 2023-11-10 13:00:02 UTC
